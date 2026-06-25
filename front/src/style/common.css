@@ -1,0 +1,91 @@
+/* 人事管理系统 - 全局样式 */
+/* 主题色：蓝色 #409EFF，白色 #FFFFFF */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
+  background-color: #f5f7fa;
+  color: #303133;
+}
+
+/* 主色调 */
+:root {
+  --primary-color: #409EFF;
+  --success-color: #67C23A;
+  --warning-color: #E6A23C;
+  --danger-color: #F56C6C;
+  --info-color: #909399;
+  --bg-color: #f5f7fa;
+  --white: #ffffff;
+  --text-primary: #303133;
+  --text-regular: #606266;
+  --text-secondary: #909399;
+  --border-color: #dcdfe6;
+}
+
+/* 卡片样式 */
+.el-card {
+  border-radius: 8px;
+  border: none;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* 按钮圆角 */
+.el-button {
+  border-radius: 6px;
+}
+
+/* 表格样式 */
+.el-table {
+  border-radius: 8px;
+}
+
+.el-table th {
+  background-color: #f5f7fa !important;
+}
+
+/* 输入框圆角 */
+.el-input__wrapper {
+  border-radius: 6px;
+}
+
+/* 对话框圆角 */
+.el-dialog {
+  border-radius: 12px;
+}
+
+/* 标签样式 */
+.el-tag {
+  border-radius: 4px;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #c0c4cc;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #f5f7fa;
+}
+
+/* 响应式布局 */
+@media screen and (max-width: 768px) {
+  .el-aside {
+    display: none;
+  }
+  
+  .el-main {
+    padding: 10px;
+  }
+}

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hr.management.mapper.FundMapper">
+
+    <resultMap id="BaseResultMap" type="com.hr.management.entity.Fund">
+        <id column="id" property="id"/>
+        <result column="account_no" property="accountNo"/>
+        <result column="name" property="name"/>
+        <result column="gender" property="gender"/>
+        <result column="department" property="department"/>
+        <result column="salary" property="salary"/>
+        <result column="personal_pay" property="personalPay"/>
+        <result column="company_pay" property="companyPay"/>
+        <result column="birth_date" property="birthDate"/>
+        <result column="balance" property="balance"/>
+        <result column="status" property="status"/>
+        <result column="open_date" property="openDate"/>
+        <result column="employee_id" property="employeeId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="selectByAccountNo" resultMap="BaseResultMap">
+        SELECT * FROM fund WHERE account_no = #{accountNo}
+    </select>
+
+    <select id="selectByEmployeeId" resultMap="BaseResultMap">
+        SELECT * FROM fund WHERE employee_id = #{employeeId}
+    </select>
+
+    <select id="selectByDepartment" resultMap="BaseResultMap">
+        SELECT * FROM fund WHERE department = #{department} ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByStatus" resultMap="BaseResultMap">
+        SELECT * FROM fund WHERE status = #{status} ORDER BY create_time DESC
+    </select>
+
+    <select id="selectActiveAccounts" resultMap="BaseResultMap">
+        SELECT * FROM fund WHERE status = 'active' ORDER BY create_time DESC
+    </select>
+
+</mapper>

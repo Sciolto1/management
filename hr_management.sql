@@ -1,37 +1,75 @@
 /*!40101 SET NAMES utf8mb4 */;
 
+-- ============================================
+-- 公司人事管理系统 - 完整数据库脚本
+-- ============================================
+
 -- ============ 完全重置数据库 ============
 DROP DATABASE IF EXISTS `hr_management`;
 CREATE DATABASE IF NOT EXISTS `hr_management` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE `hr_management`;
 
--- ============ 1. 部门表 ============
+-- ============================================
+-- 1. 部门表
+-- ============================================
 DROP TABLE IF EXISTS `department`;
 CREATE TABLE `department` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT '部门ID',
+  `dept_code` VARCHAR(20) DEFAULT NULL COMMENT '部门编码',
   `name` VARCHAR(50) NOT NULL COMMENT '部门名称',
   `manager` VARCHAR(50) DEFAULT NULL COMMENT '部门负责人',
   `description` VARCHAR(200) DEFAULT NULL COMMENT '部门描述',
+  `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
+  `status` VARCHAR(20) DEFAULT 'active' COMMENT '状态(active-正常, inactive-停用)',
   `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_name` (`name`)
+  UNIQUE KEY `uk_name` (`name`),
+  UNIQUE KEY `uk_dept_code` (`dept_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='部门表';
 
-INSERT INTO `department` (`id`, `name`, `manager`, `description`) VALUES
-(1, '技术部', '张三', '负责公司技术研发工作'),
-(2, '人事部', '王五', '负责人力资源管理'),
-(3, '财务部', NULL, '负责财务核算与管理'),
-(4, '市场部', NULL, '负责市场推广与营销');
+INSERT INTO `department` (`id`, `dept_code`, `name`, `manager`, `description`, `remark`, `status`) VALUES
+(1, 'DEPT001', '技术部', '张三', '负责公司技术研发工作', '核心研发部门', 'active'),
+(2, 'DEPT002', '人事部', '王五', '负责人力资源管理', '综合管理处', 'active'),
+(3, 'DEPT003', '财务部', NULL, '负责财务核算与管理', NULL, 'active'),
+(4, 'DEPT004', '市场部', NULL, '负责市场推广与营销', NULL, 'active'),
+(5, 'DEPT005', '生产车间', NULL, '负责产品生产制造', '一线生产部门', 'active');
 
--- ============ 2. 员工表 ============
+-- ============================================
+-- 2. 员工表
+-- ============================================
 DROP TABLE IF EXISTS `employee`;
 CREATE TABLE `employee` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT '员工ID',
+  `employee_no` VARCHAR(20) DEFAULT NULL COMMENT '职工编号',
   `name` VARCHAR(50) NOT NULL COMMENT '姓名',
+  `photo` VARCHAR(255) DEFAULT NULL COMMENT '照片',
+  `age` INT DEFAULT NULL COMMENT '年龄',
+  `gender` VARCHAR(10) DEFAULT NULL COMMENT '性别',
+  `birth_date` DATE DEFAULT NULL COMMENT '出生日期',
+  `ethnicity` VARCHAR(20) DEFAULT NULL COMMENT '民族',
+  `political_status` VARCHAR(20) DEFAULT NULL COMMENT '政治面貌',
+  `marital_status` VARCHAR(10) DEFAULT NULL COMMENT '婚否',
+  `id_card` VARCHAR(18) DEFAULT NULL COMMENT '身份证号',
   `department` VARCHAR(50) NOT NULL COMMENT '部门',
   `position` VARCHAR(50) NOT NULL COMMENT '职位',
+  `team_group` VARCHAR(50) DEFAULT NULL COMMENT '班组',
+  `employee_category` VARCHAR(20) DEFAULT NULL COMMENT '人员类别(worker-工人, cadre-干部, temp-临时工)',
+  `title` VARCHAR(50) DEFAULT NULL COMMENT '职称',
+  `major` VARCHAR(50) DEFAULT NULL COMMENT '专业',
+  `education` VARCHAR(20) DEFAULT NULL COMMENT '学历',
+  `graduation_school` VARCHAR(100) DEFAULT NULL COMMENT '毕业学校',
+  `graduation_date` DATE DEFAULT NULL COMMENT '毕业时间',
+  `base_salary` DECIMAL(10,2) DEFAULT 0 COMMENT '基本工资',
   `phone` VARCHAR(20) DEFAULT NULL COMMENT '电话',
   `email` VARCHAR(100) DEFAULT NULL COMMENT '邮箱',
+  `entry_date` DATE DEFAULT NULL COMMENT '入厂时间',
+  `work_start_date` DATE DEFAULT NULL COMMENT '参加工作时间',
+  `contract_start_date` DATE DEFAULT NULL COMMENT '合同开始日期',
+  `contract_end_date` DATE DEFAULT NULL COMMENT '合同结束日期',
+  `home_address` VARCHAR(200) DEFAULT NULL COMMENT '家庭住址',
+  `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
+  `status` VARCHAR(20) DEFAULT 'active' COMMENT '状态(active-在职, left-离职, retired-退休)',
   `hire_date` DATE DEFAULT NULL COMMENT '入职日期',
   `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -39,16 +77,26 @@ CREATE TABLE `employee` (
   `password` VARCHAR(100) DEFAULT NULL COMMENT '登录密码',
   `role` VARCHAR(20) DEFAULT 'user' COMMENT '角色',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_username` (`username`)
+  UNIQUE KEY `uk_employee_no` (`employee_no`),
+  UNIQUE KEY `uk_username` (`username`),
+  KEY `idx_department` (`department`),
+  KEY `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='员工表';
 
-INSERT INTO `employee` (`id`, `name`, `department`, `position`, `phone`, `email`, `hire_date`, `username`, `password`, `role`) VALUES
-(1, '张三', '技术部', '前端工程师', '13800138001', 'zhangsan@company.com', '2023-01-15', 'user1', 'user1', 'dept_admin'),
-(2, '李四', '技术部', '后端工程师', '13800138002', 'lisi@company.com', '2023-03-20', 'user2', 'user2', 'user'),
-(3, '王五', '人事部', 'HR专员', '13800138003', 'wangwu@company.com', '2022-08-10', 'deptadmin1', 'deptadmin1', 'dept_admin'),
-(4, '系统管理员', '管理层', '系统管理员', '', '', '2020-01-01', 'admin', 'admin', 'admin');
+INSERT INTO `employee` (`id`, `employee_no`, `name`, `age`, `gender`, `birth_date`, `ethnicity`, `political_status`, `marital_status`, `id_card`, `department`, `position`, `team_group`, `employee_category`, `title`, `major`, `education`, `graduation_school`, `graduation_date`, `base_salary`, `phone`, `email`, `entry_date`, `work_start_date`, `contract_start_date`, `contract_end_date`, `home_address`, `status`, `hire_date`, `username`, `password`, `role`) VALUES
+(1, 'EMP0001', '张三', 32, '男', '1990-05-15', '汉族', '党员', '已婚', '110101199005151234', '技术部', '前端工程师', '前端组', 'cadre', '工程师', '计算机科学', '本科', '清华大学', '2012-07-01', 8000.00, '13800138001', 'zhangsan@company.com', '2023-01-15', '2012-07-01', '2023-01-15', '2026-01-14', '北京市朝阳区建国路1号', 'active', '2023-01-15', 'user1', 'user1', 'dept_admin'),
+(2, 'EMP0002', '李四', 30, '男', '1991-08-20', '汉族', '群众', '未婚', '110101199108202345', '技术部', '后端工程师', '后端组', 'worker', '助理工程师', '软件工程', '本科', '北京大学', '2014-07-01', 7500.00, '13800138002', 'lisi@company.com', '2023-03-20', '2014-07-01', '2023-03-20', '2026-03-19', '北京市海淀区中关村大街2号', 'active', '2023-03-20', 'user2', 'user2', 'user'),
+(3, 'EMP0003', '王五', 31, '女', '1992-03-10', '汉族', '团员', '已婚', '110101199203103456', '人事部', 'HR专员', '人事组', 'cadre', '经济师', '人力资源', '本科', '复旦大学', '2014-07-01', 6500.00, '13800138003', 'wangwu@company.com', '2022-08-10', '2014-07-01', '2022-08-10', '2025-08-09', '上海市浦东新区张江路3号', 'active', '2022-08-10', 'deptadmin1', 'deptadmin1', 'dept_admin'),
+(4, 'ADMIN01', '系统管理员', 35, '男', '1988-01-01', '汉族', '党员', '已婚', '110101198801011234', '管理层', '系统管理员', NULL, 'cadre', '高级工程师', '计算机科学', '本科', '北京航空航天大学', '2010-07-01', 12000.00, '13800138000', 'admin@company.com', '2020-01-01', '2010-07-01', '2020-01-01', '2030-12-31', '北京市西城区金融街1号', 'active', '2020-01-01', 'admin', 'admin', 'admin'),
+(5, 'EMP0004', '赵六', 28, '男', '1995-06-25', '汉族', '群众', '未婚', '110101199506254567', '财务部', '会计', '财务组', 'cadre', '会计师', '财务管理', '本科', '中央财经大学', '2017-07-01', 7000.00, '13800138004', 'zhaoliu@company.com', '2023-05-10', '2017-07-01', '2023-05-10', '2026-05-09', '北京市西城区西直门4号', 'active', '2023-05-10', 'user3', 'user3', 'user'),
+(6, 'EMP0005', '钱七', 26, '女', '1997-11-08', '汉族', '群众', '未婚', '110101199711085678', '市场部', '市场专员', '市场组', 'worker', '助理营销师', '市场营销', '大专', '对外经济贸易大学', '2019-07-01', 5500.00, '13800138005', 'qianqi@company.com', '2023-06-01', '2019-07-01', '2023-06-01', '2026-05-31', '北京市丰台区方庄5号', 'active', '2023-06-01', 'user4', 'user4', 'user'),
+(7, 'EMP0006', '孙八', 45, '男', '1978-04-12', '汉族', '党员', '已婚', '110101197804126789', '生产车间', '车间主任', '装配一组', 'cadre', '高级工程师', '机械工程', '本科', '哈尔滨工业大学', '2000-07-01', 9500.00, '13800138006', 'sunba@company.com', '2021-03-15', '2000-07-01', '2021-03-15', '2026-03-14', '北京市通州区运河6号', 'active', '2021-03-15', 'user5', 'user5', 'dept_admin'),
+(8, 'EMP0007', '周九', 38, '男', '1985-09-30', '汉族', '群众', '已婚', '110101198509307890', '生产车间', '技术工人', '装配二组', 'worker', '高级技师', '机械制造', '高中', '北京市工业技工学校', '2003-07-01', 6500.00, '13800138007', 'zhoujiu@company.com', '2022-01-10', '2003-07-01', '2022-01-10', '2025-01-09', '北京市大兴区黄村7号', 'active', '2022-01-10', 'user6', 'user6', 'user'),
+(9, 'TEMP0001', '吴十', 24, '女', '2000-02-14', '回族', '群众', '未婚', '110101200002149012', '生产车间', '临时工', '包装组', 'temp', NULL, '电子商务', '大专', '北京城市学院', '2022-07-01', 4000.00, '13800138008', 'wushi@company.com', '2024-01-05', '2022-07-01', '2024-01-05', '2024-12-31', '北京市昌平区回龙观8号', 'active', '2024-01-05', 'user7', 'user7', 'user');
 
--- ============ 3. 通知公告表 ============
+-- ============================================
+-- 3. 通知公告表
+-- ============================================
 DROP TABLE IF EXISTS `notice`;
 CREATE TABLE `notice` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT '通知ID',
@@ -62,9 +110,12 @@ CREATE TABLE `notice` (
 
 INSERT INTO `notice` (`id`, `title`, `content`, `author`, `publish_date`) VALUES
 (1, '2026年元旦放假通知', '根据国家法定节假日安排，2026年元旦放假时间为1月1日至1月3日，共3天。请各部门提前做好工作安排。', '人事部', '2025-12-25'),
-(2, '公司年会通知', '公司将于2026年1月20日举办年度总结大会暨年会，届时将进行年度优秀员工表彰，请全体员工准时参加。', '行政部', '2026-01-05');
+(2, '公司年会通知', '公司将于2026年1月20日举办年度总结大会暨年会，届时将进行年度优秀员工表彰，请全体员工准时参加。', '行政部', '2026-01-05'),
+(3, '部门人员管理优化公告', '公司人事管理系统已优化部门人员管理模块，新增人员档案、工种分类、合同期限等20余项字段，详情请联系人事部。', '人事部', '2026-01-10');
 
--- ============ 4. 请假申请表 ============
+-- ============================================
+-- 4. 请假申请表
+-- ============================================
 DROP TABLE IF EXISTS `leave_request`;
 CREATE TABLE `leave_request` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT '请假ID',
@@ -81,9 +132,12 @@ CREATE TABLE `leave_request` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='请假申请表';
 
 INSERT INTO `leave_request` (`id`, `employee_id`, `employee_name`, `type`, `start_date`, `end_date`, `reason`, `status`) VALUES
-(1, 1, '张三', 'annual', '2026-01-10', '2026-01-12', '回老家探亲', 'pending');
+(1, 1, '张三', 'annual', '2026-01-10', '2026-01-12', '回老家探亲', 'pending'),
+(2, 6, '钱七', 'sick', '2026-01-08', '2026-01-09', '感冒发烧', 'approved');
 
--- ============ 5. 考勤记录表 ============
+-- ============================================
+-- 5. 考勤记录表
+-- ============================================
 DROP TABLE IF EXISTS `attendance`;
 CREATE TABLE `attendance` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT '考勤ID',
@@ -99,9 +153,13 @@ CREATE TABLE `attendance` (
 
 INSERT INTO `attendance` (`id`, `employee_id`, `date`, `clock_in`, `clock_out`, `status`) VALUES
 (1, 1, '2026-01-06', '09:00:00', '18:00:00', 'normal'),
-(2, 2, '2026-01-06', '08:55:00', '18:30:00', 'normal');
+(2, 2, '2026-01-06', '08:55:00', '18:30:00', 'normal'),
+(3, 3, '2026-01-06', '08:45:00', '18:15:00', 'normal'),
+(4, 1, '2026-01-07', '09:05:00', '18:00:00', 'late');
 
--- ============ 6. 工资记录表 ============
+-- ============================================
+-- 6. 工资记录表
+-- ============================================
 DROP TABLE IF EXISTS `salary`;
 CREATE TABLE `salary` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT '工资ID',
@@ -121,9 +179,13 @@ CREATE TABLE `salary` (
 
 INSERT INTO `salary` (`id`, `employee_id`, `employee_name`, `month`, `base_salary`, `bonus`, `deduction`, `actual_salary`, `status`, `remark`) VALUES
 (1, 1, '张三', '2026-01', 8000.00, 1500.00, 500.00, 9000.00, 'paid', '全勤奖励'),
-(2, 2, '李四', '2026-01', 7500.00, 1000.00, 300.00, 8200.00, 'paid', NULL);
+(2, 2, '李四', '2026-01', 7500.00, 1000.00, 300.00, 8200.00, 'paid', NULL),
+(3, 3, '王五', '2026-01', 6500.00, 800.00, 200.00, 7100.00, 'paid', NULL),
+(4, 7, '孙八', '2026-01', 9500.00, 2000.00, 600.00, 10900.00, 'paid', '车间管理奖励');
 
--- ============ 7. 绩效考核表 ============
+-- ============================================
+-- 7. 绩效考核表
+-- ============================================
 DROP TABLE IF EXISTS `performance`;
 CREATE TABLE `performance` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT '绩效ID',
@@ -144,9 +206,13 @@ CREATE TABLE `performance` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='绩效考核表';
 
 INSERT INTO `performance` (`id`, `employee_id`, `employee_name`, `period`, `work_score`, `attitude_score`, `teamwork_score`, `innovation_score`, `total_score`, `level`, `comment`, `evaluator`) VALUES
-(1, 1, '张三', '2025-Q4', 85, 90, 88, 82, 86, 'A', '工作认真负责，技术能力强，团队协作良好', '部门经理');
+(1, 1, '张三', '2025-Q4', 85, 90, 88, 82, 86, 'A', '工作认真负责，技术能力强，团队协作良好', '部门经理'),
+(2, 2, '李四', '2025-Q4', 80, 85, 90, 75, 83, 'B', '后端开发能力强，沟通能力优秀', '部门经理'),
+(3, 7, '孙八', '2025-Q4', 92, 88, 85, 80, 87, 'A', '车间管理经验丰富，生产效率提升显著', '生产总监');
 
--- ============ 8. 培训表 ============
+-- ============================================
+-- 8. 培训表
+-- ============================================
 DROP TABLE IF EXISTS `training`;
 CREATE TABLE `training` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT '培训ID',
@@ -163,9 +229,12 @@ CREATE TABLE `training` (
 
 INSERT INTO `training` (`id`, `title`, `description`, `trainer`, `date`, `time`, `location`, `max_participants`) VALUES
 (1, '新员工入职培训', '公司规章制度、企业文化介绍', '人力资源部', '2026-02-01', '09:00-12:00', '会议室A', 30),
-(2, 'Java技术进阶培训', 'Spring Boot最新特性及实践', '技术部', '2026-02-15', '14:00-17:00', '培训中心', 25);
+(2, 'Java技术进阶培训', 'Spring Boot最新特性及实践', '技术部', '2026-02-15', '14:00-17:00', '培训中心', 25),
+(3, '安全生产培训', '车间安全生产规范及应急处理', '安全部', '2026-02-20', '09:00-12:00', '车间会议室', 50);
 
--- ============ 9. 培训报名表 ============
+-- ============================================
+-- 9. 培训报名表
+-- ============================================
 DROP TABLE IF EXISTS `training_participant`;
 CREATE TABLE `training_participant` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT '报名ID',
@@ -180,9 +249,15 @@ CREATE TABLE `training_participant` (
 
 INSERT INTO `training_participant` (`id`, `training_id`, `employee_id`) VALUES
 (1, 1, 2),
-(2, 1, 1);
+(2, 1, 1),
+(3, 2, 1),
+(4, 2, 2),
+(5, 3, 7),
+(6, 3, 8);
 
--- ============ 10. 公积金账户表 ============
+-- ============================================
+-- 10. 公积金账户表
+-- ============================================
 DROP TABLE IF EXISTS `fund`;
 CREATE TABLE `fund` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT '公积金ID',
@@ -208,9 +283,12 @@ CREATE TABLE `fund` (
 INSERT INTO `fund` (`id`, `account_no`, `name`, `gender`, `department`, `salary`, `personal_pay`, `company_pay`, `birth_date`, `balance`, `status`, `open_date`, `employee_id`) VALUES
 (1, 'GJJ1705000001', '张三', '男', '技术部', 8000.00, 640.00, 640.00, '1990-05-15', 15360.00, 'active', '2023-01-15', 1),
 (2, 'GJJ1705000002', '李四', '男', '技术部', 7500.00, 600.00, 600.00, '1991-08-20', 14400.00, 'active', '2023-03-20', 2),
-(3, 'GJJ1705000003', '王五', '女', '人事部', 6500.00, 520.00, 520.00, '1992-03-10', 12480.00, 'active', '2022-08-10', 3);
+(3, 'GJJ1705000003', '王五', '女', '人事部', 6500.00, 520.00, 520.00, '1992-03-10', 12480.00, 'active', '2022-08-10', 3),
+(4, 'GJJ1705000004', '赵六', '男', '财务部', 7000.00, 560.00, 560.00, '1995-06-25', 13440.00, 'active', '2023-05-10', 5);
 
--- ============ 11. 公积金帐务表 ============
+-- ============================================
+-- 11. 公积金帐务表
+-- ============================================
 DROP TABLE IF EXISTS `fund_transaction`;
 CREATE TABLE `fund_transaction` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT '帐务ID',
@@ -236,4 +314,14 @@ INSERT INTO `fund_transaction` (`id`, `fund_id`, `account_no`, `name`, `trans_da
 (4, 2, 'GJJ1705000002', '李四', '2023-03-20', 0.00, 0.00, 0.00, 'open', '开户'),
 (5, 2, 'GJJ1705000002', '李四', '2023-04-01', 0.00, 1200.00, 1200.00, 'deposit', '月度缴存'),
 (6, 3, 'GJJ1705000003', '王五', '2022-08-10', 0.00, 0.00, 0.00, 'open', '开户'),
-(7, 3, 'GJJ1705000003', '王五', '2022-09-01', 0.00, 1040.00, 1040.00, 'deposit', '月度缴存');
+(7, 3, 'GJJ1705000003', '王五', '2022-09-01', 0.00, 1040.00, 1040.00, 'deposit', '月度缴存'),
+(8, 4, 'GJJ1705000004', '赵六', '2023-05-10', 0.00, 0.00, 0.00, 'open', '开户'),
+(9, 4, 'GJJ1705000004', '赵六', '2023-06-01', 0.00, 1120.00, 1120.00, 'deposit', '月度缴存');
+
+-- ============================================
+-- 完成提示
+-- ============================================
+SELECT '数据库初始化完成！' AS message;
+SELECT CONCAT('部门数: ', COUNT(*)) AS info FROM department;
+SELECT CONCAT('员工数: ', COUNT(*)) AS info FROM employee;
+SELECT CONCAT('管理员账号: admin / admin') AS login_info;

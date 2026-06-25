@@ -2,6 +2,7 @@ package com.hr.management.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hr.management.entity.Department;
 import com.hr.management.entity.Employee;
 import com.hr.management.mapper.DepartmentMapper;
@@ -13,9 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * 部门服务
- */
 @Service
 public class DepartmentService {
 
@@ -25,12 +23,8 @@ public class DepartmentService {
     @Autowired
     private EmployeeMapper employeeMapper;
 
-    /**
-     * 获取所有部门（含员工人数）
-     */
     public List<Department> list() {
         List<Department> departments = departmentMapper.selectList(null);
-        // 统计每个部门的员工数
         List<Employee> employees = employeeMapper.selectList(null);
         Map<String, Long> countMap = employees.stream()
                 .collect(Collectors.groupingBy(Employee::getDepartment, Collectors.counting()));
@@ -38,17 +32,33 @@ public class DepartmentService {
         return departments;
     }
 
-    /**
-     * 根据ID获取部门
-     */
+    public Page<Department> page(int current, int size, String keyword, String status) {
+        QueryWrapper<Department> wrapper = new QueryWrapper<>();
+        if (keyword != null && !keyword.isEmpty()) {
+            wrapper.and(w -> w.like("name", keyword)
+                    .or().like("dept_code", keyword));
+        }
+        if (status != null && !status.isEmpty()) {
+            wrapper.eq("status", status);
+        }
+        wrapper.orderByDesc("create_time");
+        Page<Department> page = new Page<>(current, size);
+        Page<Department> result = departmentMapper.selectPage(page, wrapper);
+        List<Employee> employees = employeeMapper.selectList(null);
+        Map<String, Long> countMap = employees.stream()
+                .collect(Collectors.groupingBy(Employee::getDepartment, Collectors.counting()));
+        result.getRecords().forEach(d -> d.setEmployeeCount(countMap.getOrDefault(d.getName(), 0L).intValue()));
+        return result;
+    }
+
     public Department getById(Integer id) {
         return departmentMapper.selectById(id);
     }
 
-    /**
-     * 添加部门
-     */
     public boolean add(Department department) {
+        if (department.getStatus() == null || department.getStatus().isEmpty()) {
+            department.setStatus("active");
+        }
         boolean result = departmentMapper.insert(department) > 0;
         if (result && department.getManager() != null && !department.getManager().isEmpty()) {
             setManagerRole(department.getManager(), "dept_admin");
@@ -56,38 +66,30 @@ public class DepartmentService {
         return result;
     }
 
-    /**
-     * 更新部门（同步更新负责人角色）
-     */
     @Transactional
     public boolean update(Department department) {
-        // 获取旧的部门信息，恢复旧负责人角色
         Department oldDept = departmentMapper.selectById(department.getId());
         if (oldDept != null && oldDept.getManager() != null && !oldDept.getManager().isEmpty()) {
-            // 旧负责人改回 user（如果不再是任何部门的负责人）
             if (!oldDept.getManager().equals(department.getManager())) {
                 setManagerRole(oldDept.getManager(), "user");
             }
         }
-        // 使用UpdateWrapper显式处理manager可能为null的情况
         UpdateWrapper<Department> uw = new UpdateWrapper<>();
         uw.eq("id", department.getId())
           .set("name", department.getName())
+          .set("dept_code", department.getDeptCode())
           .set("description", department.getDescription())
+          .set("remark", department.getRemark())
+          .set("status", department.getStatus())
           .set("manager", department.getManager() != null ? department.getManager() : "");
         boolean result = departmentMapper.update(null, uw) > 0;
-        // 新负责人设为 dept_admin
         if (result && department.getManager() != null && !department.getManager().isEmpty()) {
             setManagerRole(department.getManager(), "dept_admin");
         }
         return result;
     }
 
-    /**
-     * 删除部门
-     */
     public boolean delete(Integer id) {
-        // 恢复负责人角色
         Department dept = departmentMapper.selectById(id);
         if (dept != null && dept.getManager() != null && !dept.getManager().isEmpty()) {
             setManagerRole(dept.getManager(), "user");
@@ -95,9 +97,16 @@ public class DepartmentService {
         return departmentMapper.deleteById(id) > 0;
     }
 
-    /**
-     * 根据员工姓名设置其角色
-     */
+    public boolean batchDelete(List<Integer> ids) {
+        for (Integer id : ids) {
+            Department dept = departmentMapper.selectById(id);
+            if (dept != null && dept.getManager() != null && !dept.getManager().isEmpty()) {
+                setManagerRole(dept.getManager(), "user");
+            }
+        }
+        return departmentMapper.deleteBatchIds(ids) > 0;
+    }
+
     private void setManagerRole(String employeeName, String role) {
         QueryWrapper<Employee> wrapper = new QueryWrapper<>();
         wrapper.eq("name", employeeName);

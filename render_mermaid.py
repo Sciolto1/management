@@ -82,7 +82,8 @@ def main():
     mermaid_blocks = extract_mermaid_blocks(md_file)
     
     chart_names = [
-        '系统架构图',
+        '系统架构图简约版',
+        '系统架构图详细版',
         '用户认证模块类图',
         '员工管理模块类图',
         '部门管理模块类图',

@@ -256,7 +256,48 @@ INSERT INTO `training_participant` (`id`, `training_id`, `employee_id`) VALUES
 (6, 3, 8);
 
 -- ============================================
--- 10. 公积金账户表
+-- 10. 人员调动记录表
+-- ============================================
+DROP TABLE IF EXISTS `transfer_record`;
+CREATE TABLE `transfer_record` (
+  `id` INT NOT NULL AUTO_INCREMENT COMMENT '调动记录ID',
+  `transfer_no` VARCHAR(30) DEFAULT NULL COMMENT '调动单号',
+  `employee_id` INT NOT NULL COMMENT '员工ID',
+  `employee_name` VARCHAR(50) NOT NULL COMMENT '员工姓名',
+  `employee_no` VARCHAR(20) DEFAULT NULL COMMENT '职工编号',
+  `transfer_type` VARCHAR(20) NOT NULL COMMENT '调动类型(internal-内部调动, external_in-外单位调入, external_out-调出外单位, retire-离退休, dismiss-除名)',
+  `source_department` VARCHAR(50) DEFAULT NULL COMMENT '原部门',
+  `target_department` VARCHAR(50) DEFAULT NULL COMMENT '目标部门',
+  `source_position` VARCHAR(50) DEFAULT NULL COMMENT '原职位',
+  `target_position` VARCHAR(50) DEFAULT NULL COMMENT '目标职位',
+  `source_team_group` VARCHAR(50) DEFAULT NULL COMMENT '原班组',
+  `target_team_group` VARCHAR(50) DEFAULT NULL COMMENT '目标班组',
+  `source_employee_category` VARCHAR(20) DEFAULT NULL COMMENT '原人员类别',
+  `target_employee_category` VARCHAR(20) DEFAULT NULL COMMENT '目标人员类别',
+  `source_base_salary` DECIMAL(10,2) DEFAULT 0 COMMENT '原基本工资',
+  `target_base_salary` DECIMAL(10,2) DEFAULT 0 COMMENT '目标基本工资',
+  `transfer_date` DATE DEFAULT NULL COMMENT '调动日期',
+  `reason` VARCHAR(500) DEFAULT NULL COMMENT '调动原因',
+  `approver` VARCHAR(50) DEFAULT NULL COMMENT '审批人',
+  `status` VARCHAR(20) DEFAULT 'pending' COMMENT '状态(pending-待审批, approved-已通过, rejected-已驳回)',
+  `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_transfer_no` (`transfer_no`),
+  KEY `idx_employee_id` (`employee_id`),
+  KEY `idx_transfer_type` (`transfer_type`),
+  KEY `idx_status` (`status`),
+  KEY `idx_transfer_date` (`transfer_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='人员调动记录表';
+
+INSERT INTO `transfer_record` (`id`, `transfer_no`, `employee_id`, `employee_name`, `employee_no`, `transfer_type`, `source_department`, `target_department`, `source_position`, `target_position`, `source_team_group`, `target_team_group`, `source_employee_category`, `target_employee_category`, `source_base_salary`, `target_base_salary`, `transfer_date`, `reason`, `approver`, `status`, `remark`) VALUES
+(1, 'TR20260105001', 2, '李四', 'EMP0002', 'internal', '技术部', '技术部', '后端工程师', '高级后端工程师', '后端组', '后端组', 'worker', 'cadre', 7500.00, 9000.00, '2026-01-05', '技术能力突出，晋升为高级工程师', '系统管理员', 'approved', '技术部内部晋升'),
+(2, 'TR20260108002', 5, '赵六', 'EMP0004', 'internal', '财务部', '财务部', '会计', '主管会计', '财务组', '财务组', 'cadre', 'cadre', 7000.00, 8500.00, '2026-01-08', '业务熟练，晋升为主管', '系统管理员', 'approved', '财务部内部调整'),
+(3, 'TR20260110003', 8, '周九', 'EMP0007', 'internal', '生产车间', '生产车间', '技术工人', '班长', '装配二组', '装配一组', 'worker', 'worker', 6500.00, 7200.00, '2026-01-10', '工作经验丰富，调整为班长', '系统管理员', 'pending', '待审批');
+
+-- ============================================
+-- 11. 公积金账户表
 -- ============================================
 DROP TABLE IF EXISTS `fund`;
 CREATE TABLE `fund` (
@@ -324,4 +365,5 @@ INSERT INTO `fund_transaction` (`id`, `fund_id`, `account_no`, `name`, `trans_da
 SELECT '数据库初始化完成！' AS message;
 SELECT CONCAT('部门数: ', COUNT(*)) AS info FROM department;
 SELECT CONCAT('员工数: ', COUNT(*)) AS info FROM employee;
+SELECT CONCAT('调动记录数: ', COUNT(*)) AS info FROM transfer_record;
 SELECT CONCAT('管理员账号: admin / admin') AS login_info;

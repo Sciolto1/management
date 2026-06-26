@@ -52,6 +52,10 @@
           <el-icon><Wallet /></el-icon>
           <span>公积金管理</span>
         </el-menu-item>
+        <el-menu-item index="/admin/transfer">
+          <el-icon><Switch /></el-icon>
+          <span>人员调动</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
     <el-container>
@@ -80,7 +84,7 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
-import { User, UserFilled, Bell, Document, Setting, SwitchButton, Money, Clock, TrendCharts, DataAnalysis, OfficeBuilding, Reading, Wallet } from '@element-plus/icons-vue'
+import { User, UserFilled, Bell, Document, Setting, SwitchButton, Money, Clock, TrendCharts, DataAnalysis, OfficeBuilding, Reading, Wallet, Switch } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()

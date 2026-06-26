@@ -66,6 +66,11 @@ const router = createRouter({
           path: 'fund',
           name: 'FundManage',
           component: () => import('../views/Admin/FundManage.vue')
+        },
+        {
+          path: 'transfer',
+          name: 'TransferManage',
+          component: () => import('../views/Admin/TransferManage.vue')
         }
       ]
     },
